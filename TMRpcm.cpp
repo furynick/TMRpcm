@@ -325,7 +325,8 @@ boolean TMRpcm::wavInfo(char* filename){
 	#if defined (HANDLE_TAGS)
 
 		seek(36);
-	    char datStr[4] = {'d','a','t','a'};
+	    char datStr[5];
+      strcpy(datStr, "data");
 	    for (byte i =0; i<4; i++){
 			if(sFile.read() != datStr[i]){
 			 	seek(40);
@@ -1379,8 +1380,9 @@ byte TMRpcm::metaInfo(boolean infoType, char* filename, char* tagData, byte whic
 	#endif
 
 	boolean found=0;
-		char* datStr = "LIST";
-		if(infoType == 1){datStr = "ID3 "; datStr[3] = 3;}
+		char datStr[5];
+    strcpy(datStr, "LIST");
+		if(infoType == 1){strcpy(datStr, "ID3 "); datStr[3] = 3;}
 		char tmpChars[4];
 
 	if(infoType == 0){ //if requesting LIST info, check for data at beginning of file first
@@ -1408,7 +1410,10 @@ byte TMRpcm::metaInfo(boolean infoType, char* filename, char* tagData, byte whic
 
 	unsigned long listEnd;
 	unsigned int listLen;
-	char* tagNames[] = {"INAM","IART","IPRD"};
+	char* tagNames[3];
+  strcpy(tagNames[0], "INAM");
+  strcpy(tagNames[1], "IART");
+  strcpy(tagNames[2], "IPRD");
 
 	if(infoType == 0){ //LIST format
 		listLen = xFile.read(); listLen = xFile.read() << 8 | listLen;
@@ -1428,7 +1433,9 @@ byte TMRpcm::metaInfo(boolean infoType, char* filename, char* tagData, byte whic
 			xFile.seekSet(xFile.curPosition() + 5);
 		#endif
 			listLen = xFile.read() << 7 | listLen; listLen = xFile.read() | listLen;
-			tagNames[0] = "TPE1"; tagNames[1] ="TIT2"; tagNames[2] ="TALB";
+			strcpy(tagNames[0], "TPE1");
+      strcpy(tagNames[1], "TIT2");
+      strcpy(tagNames[2], "TALB");
 		#if !defined (SDFAT)
 			listEnd = xFile.position() + listLen;
 		#else
@@ -1566,12 +1573,12 @@ void TMRpcm::finalizeWavTemplate(char* filename){
 
 
 
-	seek(4); byte data[4] = {lowByte(fSize),highByte(fSize), fSize >> 16,fSize >> 24};
+	seek(4); byte data[4] = {lowByte(fSize),highByte(fSize), (byte)(fSize >> 16), (byte)(fSize >> 24)};
 	sFile.write(data,4);
 	byte tmp;
 	seek(40);
 	fSize = fSize - 36;
-	data[0] = lowByte(fSize); data[1]=highByte(fSize);data[2]=fSize >> 16;data[3]=fSize >> 24;
+	data[0] = lowByte(fSize); data[1]=highByte(fSize);data[2]=(byte)(fSize >> 16);data[3]=(byte)(fSize >> 24);
 	sFile.write((byte*)data,4);
 	sFile.close();
 
